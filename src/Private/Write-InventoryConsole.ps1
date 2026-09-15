@@ -72,6 +72,20 @@ function Write-InventoryConsole {
         Write-Host ('  Global status:  {0}' -f $globalStatus)
     }
 
+    $virtualization = $Inventory.diagnostics.health.virtualization
+    if ($virtualization -and $virtualization.readiness) {
+        Write-Host ''
+        Write-Host 'WSL / Virtualization'
+        Write-Host ('  Hypervisor:     {0}' -f $virtualization.readiness.hypervisorState)
+        Write-Host ('  Firmware VT:    {0}' -f $virtualization.firmwareVirtualization)
+        Write-Host ('  WSL:            {0}' -f $virtualization.readiness.wslInstalled)
+        Write-Host ('  WSL feature:    {0}' -f $virtualization.readiness.wslFeatureState)
+        Write-Host ('  VM Platform:    {0}' -f $virtualization.readiness.virtualMachinePlatformState)
+        $distributionSummary = if (@($virtualization.wsl.distributions).Count -gt 0) { @($virtualization.wsl.distributions | ForEach-Object { '{0} (WSL {1})' -f $_.name, $_.version }) -join ', ' } else { 'None' }
+        Write-Host ('  Distributions:  {0}' -f $distributionSummary)
+        Write-Host ('  WSL 2 readiness: {0}' -f $virtualization.readiness.wsl2Ready)
+    }
+
     Write-Host ''
     Write-Host 'Development tools'
     $shadowedComponents = @($Inventory.diagnostics.findings |

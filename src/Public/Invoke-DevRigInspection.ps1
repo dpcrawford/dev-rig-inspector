@@ -22,12 +22,14 @@ function Invoke-DevRigInspection {
     $gitHealthResult = Get-GitHealthInventory
     $pythonHealthResult = Get-PythonHealthInventory
     $nodeHealthResult = Get-NodeHealthInventory
+    $virtualizationHealthResult = Get-VirtualizationHealthInventory
     $computer = if ($systemResult.status -eq 'Available') { $systemResult.data } else { [pscustomobject]@{} }
     $tools = if ($toolsResult.status -eq 'Available') { @($toolsResult.data) } else { @() }
     $powerShellHealth = if ($powerShellHealthResult.status -eq 'Available') { $powerShellHealthResult.data } else { [pscustomobject]@{} }
     $gitHealth = if ($gitHealthResult.status -eq 'Available') { $gitHealthResult.data } else { [pscustomobject]@{} }
     $pythonHealth = if ($pythonHealthResult.status -eq 'Available') { $pythonHealthResult.data } else { [pscustomobject]@{} }
     $nodeHealth = if ($nodeHealthResult.status -eq 'Available') { $nodeHealthResult.data } else { [pscustomobject]@{} }
+    $virtualizationHealth = if ($virtualizationHealthResult.status -eq 'Available') { $virtualizationHealthResult.data } else { [pscustomobject]@{} }
     $findings = @(Get-InventoryDiagnostics -Tools $tools)
     if ($powerShellHealthResult.status -eq 'Available') {
         $findings += Get-PowerShellHealthDiagnostics -PowerShellHealth $powerShellHealth
@@ -41,11 +43,15 @@ function Invoke-DevRigInspection {
     if ($nodeHealthResult.status -eq 'Available') {
         $findings += Get-NodeHealthDiagnostics -NodeHealth $nodeHealth
     }
+    if ($virtualizationHealthResult.status -eq 'Available') {
+        $findings += Get-VirtualizationHealthDiagnostics -VirtualizationHealth $virtualizationHealth
+    }
     $health = [pscustomobject]@{
         powerShell = $powerShellHealth
         git = $gitHealth
         python = $pythonHealth
         node = $nodeHealth
+        virtualization = $virtualizationHealth
     }
     $inventory = New-InspectionResult -Computer $computer -Tools $tools -CollectorResults @($systemResult, $toolsResult) -Findings $findings -Health $health
 
