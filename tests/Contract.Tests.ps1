@@ -6,7 +6,7 @@ Describe 'Inspection contract' {
         $json = Invoke-DevRigInspection -JsonOnly
         $inventory = $json | ConvertFrom-Json
         $inventory.schemaVersion | Should Be '0.1'
-        $inventory.collectorVersion | Should Be '0.1.0'
+        $inventory.collectorVersion | Should Be '0.2.0'
         $inventory.tools.Count | Should Be 9
         $inventory.diagnostics.collectorResults.Count | Should Be 2
     }
