@@ -5,10 +5,31 @@ function Get-PythonVersionText {
     if ($text -match '(?<!\d)(\d+\.\d+(?:\.\d+){0,2})') { $Matches[1] } else { $text }
 }
 
+function Invoke-PythonHealthProbe {
+    param(
+        [Parameter(Mandatory)] [string] $FilePath,
+        [Parameter(Mandatory)] [string[]] $Arguments
+    )
+
+    try {
+        Invoke-ExternalCommand -FilePath $FilePath -Arguments $Arguments
+    } catch {
+        [pscustomobject]@{
+            arguments = @($Arguments)
+            exitCode = $null
+            standardOutput = ''
+            standardError = ''
+            timedOut = $false
+            probeFailed = $true
+            probeError = $_.Exception.Message
+        }
+    }
+}
+
 function Get-PythonCandidateEvidence {
     param([Parameter(Mandatory)] [object] $Candidate)
 
-    $execution = Invoke-ExternalCommand -FilePath $Candidate.path -Arguments @('--version')
+    $execution = Invoke-PythonHealthProbe -FilePath $Candidate.path -Arguments @('--version')
     [pscustomobject]@{
         name = $Candidate.name
         commandType = $Candidate.commandType
@@ -18,6 +39,8 @@ function Get-PythonCandidateEvidence {
         order = $Candidate.order
         version = if ($execution.exitCode -eq 0) { Get-PythonVersionText -Execution $execution } else { $null }
         runnable = $execution.exitCode -eq 0
+        probeFailed = $execution.probeFailed
+        probeError = $execution.probeError
         windowsAppsAlias = $Candidate.normalizedParentDirectory -match '\\Microsoft\\WindowsApps$'
     }
 }
@@ -41,23 +64,31 @@ function Get-PythonHealthInventory {
     $pip = [pscustomobject]@{
         available = $false
         version = $null
+        probeFailed = $false
+        probeError = $null
     }
     if ($pythonResolution.selected) {
-        $pipExecution = Invoke-ExternalCommand -FilePath $pythonResolution.selected.path -Arguments @('-m', 'pip', '--version')
+        $pipExecution = Invoke-PythonHealthProbe -FilePath $pythonResolution.selected.path -Arguments @('-m', 'pip', '--version')
         if ($pipExecution.exitCode -eq 0) {
             $pip.available = $true
             $pip.version = Get-PythonVersionText -Execution $pipExecution
         }
+        $pip.probeFailed = $pipExecution.probeFailed
+        $pip.probeError = $pipExecution.probeError
     }
 
     $pyLauncher = [pscustomobject]@{
         available = $false
         reportedPythonVersion = $null
         selectedCommand = $pyResolution.selected
+        probeFailed = $false
+        probeError = $null
     }
     if ($pyResolution.selected) {
-        $pyExecution = Invoke-ExternalCommand -FilePath $pyResolution.selected.path -Arguments @('--version')
+        $pyExecution = Invoke-PythonHealthProbe -FilePath $pyResolution.selected.path -Arguments @('--version')
         $pyLauncher.available = $pyExecution.exitCode -eq 0
+        $pyLauncher.probeFailed = $pyExecution.probeFailed
+        $pyLauncher.probeError = $pyExecution.probeError
         if ($pyLauncher.available) { $pyLauncher.reportedPythonVersion = Get-PythonVersionText -Execution $pyExecution }
     }
 
@@ -65,10 +96,14 @@ function Get-PythonHealthInventory {
         available = $false
         version = $null
         selectedCommand = $uvResolution.selected
+        probeFailed = $false
+        probeError = $null
     }
     if ($uvResolution.selected) {
-        $uvExecution = Invoke-ExternalCommand -FilePath $uvResolution.selected.path -Arguments @('--version')
+        $uvExecution = Invoke-PythonHealthProbe -FilePath $uvResolution.selected.path -Arguments @('--version')
         $uv.available = $uvExecution.exitCode -eq 0
+        $uv.probeFailed = $uvExecution.probeFailed
+        $uv.probeError = $uvExecution.probeError
         if ($uv.available) { $uv.version = Get-PythonVersionText -Execution $uvExecution }
     }
 

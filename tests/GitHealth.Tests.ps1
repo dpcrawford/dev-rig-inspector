@@ -113,6 +113,41 @@ Describe 'Git and GitHub health' {
         }
     }
 
+    It 'sanitizes custom and secret-looking credential helpers' {
+        InModuleScope DevRigInspector {
+            Mock Invoke-ExternalCommand {
+                param([string] $FilePath, [string[]] $Arguments)
+                [pscustomobject]@{
+                    exitCode = 0
+                    standardOutput = "manager-core`n!f(){ echo SUPER_SECRET_TOKEN; }`nC:\\Tools\\helper.exe --token=LEAK_ME"
+                    standardError = ''
+                }
+            }
+            $evidence = Get-SafeCredentialHelperEvidence -Resolution ([pscustomobject]@{ selected = [pscustomobject]@{ path = 'C:\Git\git.exe' } })
+            $evidence.configured | Should Be $true
+            $evidence.types | Should Be @('manager-core', 'custom', 'unknown')
+            ($evidence | ConvertTo-Json -Depth 8) | Should Not Match 'SUPER_SECRET_TOKEN|LEAK_ME|helper.exe'
+        }
+    }
+
+    It 'does not terminate collection when Git and GitHub probes throw' {
+        InModuleScope DevRigInspector {
+            Mock Resolve-ToolCommand {
+                param([string] $CommandName)
+                [pscustomobject]@{
+                    selected = [pscustomobject]@{ path = "C:\$CommandName.exe" }
+                    candidates = @([pscustomobject]@{ path = "C:\$CommandName.exe"; name = "$CommandName.exe"; order = 1 })
+                }
+            }
+            Mock Invoke-ExternalCommand { throw 'process start failed' }
+            $result = Get-GitHealthInventory
+            $result.status | Should Be 'Available'
+            $result.data.git.version | Should Be $null
+            $result.data.githubCli.authentication.authenticated | Should Be $false
+            $result.data.githubCli.authentication.available | Should Be $false
+        }
+    }
+
     It 'handles gh authentication command failure without throwing' {
         InModuleScope DevRigInspector {
             Mock Resolve-ToolCommand {
@@ -122,8 +157,8 @@ Describe 'Git and GitHub health' {
                     candidates = @([pscustomobject]@{ path = "C:\$CommandName.exe"; name = "$CommandName.exe"; order = 1 })
                 }
             }
-            Mock Invoke-ExternalCommand {
-                param([string] $FilePath, [string[]] $Arguments)
+            Mock Invoke-GitHealthCommand {
+                param([object] $Resolution, [string[]] $Arguments)
                 if ($Arguments -contains 'auth') {
                     [pscustomobject]@{ exitCode = 1; standardOutput = ''; standardError = 'not logged in'; timedOut = $false; durationMilliseconds = 1 }
                 } elseif ($Arguments -contains '--version') {

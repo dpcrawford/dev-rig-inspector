@@ -167,4 +167,25 @@ Describe 'Python health' {
             }
         }
     }
+
+    It 'does not terminate collection when Python, py, uv, or pip probes throw' {
+        InModuleScope DevRigInspector {
+            Mock Resolve-ToolCommand {
+                param([string] $CommandName)
+                $path = "C:\$CommandName.exe"
+                [pscustomobject]@{
+                    selected = [pscustomobject]@{ name = "$CommandName.exe"; commandType = 'Application'; path = $path; source = $path; normalizedParentDirectory = 'C:\'; order = 1 }
+                    candidates = @([pscustomobject]@{ name = "$CommandName.exe"; commandType = 'Application'; path = $path; source = $path; normalizedParentDirectory = 'C:\'; order = 1 })
+                }
+            }
+            Mock Invoke-ExternalCommand { throw 'probe start failed' }
+            $result = Get-PythonHealthInventory
+            $result.status | Should Be 'Available'
+            $result.data.selected.runnable | Should Be $false
+            $result.data.selected.probeFailed | Should Be $true
+            $result.data.pip.available | Should Be $false
+            $result.data.pyLauncher.available | Should Be $false
+            $result.data.uv.available | Should Be $false
+        }
+    }
 }

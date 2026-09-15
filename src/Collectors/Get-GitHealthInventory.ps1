@@ -8,7 +8,19 @@ function Invoke-GitHealthCommand {
         return $null
     }
 
-    Invoke-ExternalCommand -FilePath $Resolution.selected.path -Arguments $Arguments
+    try {
+        Invoke-ExternalCommand -FilePath $Resolution.selected.path -Arguments $Arguments
+    } catch {
+        [pscustomobject]@{
+            arguments = @($Arguments)
+            exitCode = $null
+            standardOutput = ''
+            standardError = ''
+            timedOut = $false
+            probeFailed = $true
+            probeError = $_.Exception.Message
+        }
+    }
 }
 
 function Get-GitConfigValue {
@@ -31,8 +43,15 @@ function Get-SafeCredentialHelperEvidence {
     $helpers = @()
     if ($null -ne $result -and $result.exitCode -eq 0) {
         $helpers = @($result.standardOutput -split "`r?`n" | Where-Object { $_.Trim().Length -gt 0 } | ForEach-Object {
-            $helper = $_.Trim()
-            if ($helper -match '^[^\s/\\]+$') { $helper } elseif ($helper -match '([^/\\\s]+)$') { $Matches[1] } else { 'configured' }
+            $helper = $_.Trim().ToLowerInvariant()
+            switch ($helper) {
+                'manager' { 'manager'; break }
+                'manager-core' { 'manager-core'; break }
+                'wincred' { 'wincred'; break }
+                'store' { 'store'; break }
+                'cache' { 'cache'; break }
+                default { if ($helper -match '^!') { 'custom' } else { 'unknown' } }
+            }
         } | Select-Object -Unique)
     }
 
