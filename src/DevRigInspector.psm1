@@ -1,0 +1,23 @@
+$implementationRoot = $PSScriptRoot
+
+@(
+    'Private/New-InventoryResults.ps1'
+    'Private/Invoke-ExternalCommand.ps1'
+    'Private/Resolve-ToolCommand.ps1'
+    'Private/ConvertTo-InventoryJson.ps1'
+    'Private/Write-InventoryLog.ps1'
+    'Private/Write-InventoryConsole.ps1'
+    'Collectors/ToolDefinitions.psd1'
+    'Collectors/Get-SystemInventory.ps1'
+    'Collectors/Get-DevelopmentToolInventory.ps1'
+    'Public/Invoke-DevRigInspection.ps1'
+) | ForEach-Object {
+    $path = Join-Path $implementationRoot $_
+    if ($_.EndsWith('.psd1')) {
+        $script:ToolDefinitions = Import-PowerShellDataFile -Path $path
+    } else {
+        . $path
+    }
+}
+
+Export-ModuleMember -Function Invoke-DevRigInspection
