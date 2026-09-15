@@ -3,8 +3,13 @@ function Invoke-DevRigInspection {
     param(
         [string] $OutputPath,
         [string] $LogPath,
-        [switch] $JsonOnly
+        [switch] $JsonOnly,
+        [switch] $PassThru
     )
+
+    if ($JsonOnly -and $PassThru) {
+        throw 'JsonOnly and PassThru cannot be used together.'
+    }
 
     if ($LogPath) {
         $parent = Split-Path -Parent $LogPath
@@ -30,5 +35,7 @@ function Invoke-DevRigInspection {
     }
     Write-InventoryConsole -Inventory $inventory
     Write-InventoryLog -Message 'Inspection completed.' -Path $LogPath
-    $inventory
+    if ($PassThru) {
+        $inventory
+    }
 }

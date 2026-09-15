@@ -20,7 +20,7 @@ Import-Module .\src\DevRigInspector.psd1
 Invoke-DevRigInspection -OutputPath .\output\inventory.json -LogPath .\output\inventory.log
 ```
 
-Use `-JsonOnly` when the JSON document should be written to the pipeline instead of readable console output. Tool definitions are maintained in `src\Collectors\ToolDefinitions.psd1`; the selected PATH command and all matching candidates are included in the result.
+The default mode writes only the readable console report. Use `-PassThru` when a PowerShell object is needed, `-JsonOnly` when JSON should be written to the pipeline, or `-OutputPath` to write JSON to a file. `-JsonOnly` and `-PassThru` cannot be combined. Tool definitions are maintained in `src\Collectors\ToolDefinitions.psd1`; the selected PATH command and all matching candidates are included in the result.
 
 Run the focused tests with:
 
