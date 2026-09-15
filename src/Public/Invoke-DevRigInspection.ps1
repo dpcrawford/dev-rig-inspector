@@ -21,11 +21,13 @@ function Invoke-DevRigInspection {
     $powerShellHealthResult = Get-PowerShellHealthInventory
     $gitHealthResult = Get-GitHealthInventory
     $pythonHealthResult = Get-PythonHealthInventory
+    $nodeHealthResult = Get-NodeHealthInventory
     $computer = if ($systemResult.status -eq 'Available') { $systemResult.data } else { [pscustomobject]@{} }
     $tools = if ($toolsResult.status -eq 'Available') { @($toolsResult.data) } else { @() }
     $powerShellHealth = if ($powerShellHealthResult.status -eq 'Available') { $powerShellHealthResult.data } else { [pscustomobject]@{} }
     $gitHealth = if ($gitHealthResult.status -eq 'Available') { $gitHealthResult.data } else { [pscustomobject]@{} }
     $pythonHealth = if ($pythonHealthResult.status -eq 'Available') { $pythonHealthResult.data } else { [pscustomobject]@{} }
+    $nodeHealth = if ($nodeHealthResult.status -eq 'Available') { $nodeHealthResult.data } else { [pscustomobject]@{} }
     $findings = @(Get-InventoryDiagnostics -Tools $tools)
     if ($powerShellHealthResult.status -eq 'Available') {
         $findings += Get-PowerShellHealthDiagnostics -PowerShellHealth $powerShellHealth
@@ -36,10 +38,14 @@ function Invoke-DevRigInspection {
     if ($pythonHealthResult.status -eq 'Available') {
         $findings += Get-PythonHealthDiagnostics -PythonHealth $pythonHealth
     }
+    if ($nodeHealthResult.status -eq 'Available') {
+        $findings += Get-NodeHealthDiagnostics -NodeHealth $nodeHealth
+    }
     $health = [pscustomobject]@{
         powerShell = $powerShellHealth
         git = $gitHealth
         python = $pythonHealth
+        node = $nodeHealth
     }
     $inventory = New-InspectionResult -Computer $computer -Tools $tools -CollectorResults @($systemResult, $toolsResult) -Findings $findings -Health $health
 

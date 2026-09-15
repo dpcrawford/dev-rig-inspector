@@ -58,6 +58,20 @@ function Write-InventoryConsole {
         Write-Host ('  pip:             {0}' -f $(if ($pythonHealth.pip.available) { 'Available' } else { 'Unavailable' }))
     }
 
+    $nodeHealth = $Inventory.diagnostics.health.node
+    if ($nodeHealth -and $nodeHealth.node) {
+        Write-Host ''
+        Write-Host 'Node / npm'
+        Write-Host ('  Node:           {0}' -f $(if ($nodeHealth.node.selected) { $nodeHealth.node.selected.version } else { 'Unavailable' }))
+        Write-Host ('  Executable:     {0}' -f $(if ($nodeHealth.node.selected) { $nodeHealth.node.selected.path } else { 'Unavailable' }))
+        Write-Host ('  npm:            {0}' -f $(if ($nodeHealth.npm.runnable) { $nodeHealth.npm.version } else { 'Unavailable' }))
+        $launchers = @($nodeHealth.npm.launcherVariants | Select-Object -ExpandProperty name -Unique)
+        Write-Host ('  Launchers:      {0}' -f $(if ($launchers.Count -gt 0) { $launchers -join ', ' } else { 'None found' }))
+        Write-Host ('  Global path:    {0}' -f $(if ($nodeHealth.npm.globalCommandPath) { $nodeHealth.npm.globalCommandPath } else { 'Unavailable' }))
+        $globalStatus = if ($null -eq $nodeHealth.npm.globalPathExists) { 'Unknown' } elseif ($nodeHealth.npm.globalPathExists) { 'Exists' } else { 'Missing' }
+        Write-Host ('  Global status:  {0}' -f $globalStatus)
+    }
+
     Write-Host ''
     Write-Host 'Development tools'
     $shadowedComponents = @($Inventory.diagnostics.findings |
