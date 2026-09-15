@@ -5,6 +5,7 @@ $implementationRoot = $PSScriptRoot
     'Private/New-DiagnosticFinding.ps1'
     'Private/Get-PathDiagnostics.ps1'
     'Private/Get-InventoryDiagnostics.ps1'
+    'Private/Get-PowerShellHealthDiagnostics.ps1'
     'Private/Invoke-ExternalCommand.ps1'
     'Private/Resolve-ToolCommand.ps1'
     'Private/ConvertTo-InventoryJson.ps1'
@@ -13,6 +14,7 @@ $implementationRoot = $PSScriptRoot
     'Collectors/ToolDefinitions.psd1'
     'Collectors/Get-SystemInventory.ps1'
     'Collectors/Get-DevelopmentToolInventory.ps1'
+    'Collectors/Get-PowerShellHealthInventory.ps1'
     'Public/Invoke-DevRigInspection.ps1'
 ) | ForEach-Object {
     $path = Join-Path $implementationRoot $_

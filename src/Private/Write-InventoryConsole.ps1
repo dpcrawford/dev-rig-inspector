@@ -12,6 +12,20 @@ function Write-InventoryConsole {
         Write-Host ('    {0}: {1:N1} GB free of {2:N1} GB' -f $volume.driveLetter, ($volume.freeBytes / 1GB), ($volume.sizeBytes / 1GB))
     }
 
+    $powerShell = $Inventory.diagnostics.health.powerShell
+    if ($powerShell -and $powerShell.active) {
+        Write-Host ''
+        Write-Host 'PowerShell'
+        Write-Host ('  Active:         {0} {1}' -f $powerShell.active.edition, $powerShell.active.version)
+        $windowsPowerShell = if ($powerShell.windowsPowerShell.present) { 'Present ({0})' -f $powerShell.windowsPowerShell.version } else { 'Not found' }
+        Write-Host ('  Windows PS:     {0}' -f $windowsPowerShell)
+        if ($powerShell.effectiveExecutionPolicy) {
+            Write-Host ('  Execution:      {0} ({1})' -f $powerShell.effectiveExecutionPolicy.policy, $powerShell.effectiveExecutionPolicy.scope)
+        }
+        $pesterVersion = if (@($powerShell.pester).Count -gt 0) { ($powerShell.pester | Select-Object -First 1).version } else { 'Not found' }
+        Write-Host ('  Pester:         {0}' -f $pesterVersion)
+    }
+
     Write-Host ''
     Write-Host 'Development tools'
     $shadowedComponents = @($Inventory.diagnostics.findings |

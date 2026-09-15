@@ -18,10 +18,18 @@ function Invoke-DevRigInspection {
     Write-InventoryLog -Message 'Inspection started.' -Path $LogPath
     $systemResult = Get-SystemInventory
     $toolsResult = Get-DevelopmentToolInventory
+    $powerShellHealthResult = Get-PowerShellHealthInventory
     $computer = if ($systemResult.status -eq 'Available') { $systemResult.data } else { [pscustomobject]@{} }
     $tools = if ($toolsResult.status -eq 'Available') { @($toolsResult.data) } else { @() }
-    $findings = Get-InventoryDiagnostics -Tools $tools
-    $inventory = New-InspectionResult -Computer $computer -Tools $tools -CollectorResults @($systemResult, $toolsResult) -Findings $findings
+    $powerShellHealth = if ($powerShellHealthResult.status -eq 'Available') { $powerShellHealthResult.data } else { [pscustomobject]@{} }
+    $findings = @(Get-InventoryDiagnostics -Tools $tools)
+    if ($powerShellHealthResult.status -eq 'Available') {
+        $findings += Get-PowerShellHealthDiagnostics -PowerShellHealth $powerShellHealth
+    }
+    $health = [pscustomobject]@{
+        powerShell = $powerShellHealth
+    }
+    $inventory = New-InspectionResult -Computer $computer -Tools $tools -CollectorResults @($systemResult, $toolsResult) -Findings $findings -Health $health
 
     if ($OutputPath) {
         $parent = Split-Path -Parent $OutputPath
