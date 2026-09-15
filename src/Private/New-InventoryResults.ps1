@@ -24,7 +24,7 @@ function New-InspectionResult {
 
     [pscustomobject]@{
         schemaVersion = '0.1'
-        collectorVersion = '0.2.0'
+        collectorVersion = '0.2.1'
         collectedAt = [DateTime]::UtcNow.ToString('o')
         computer = $Computer
         tools = @($Tools)
