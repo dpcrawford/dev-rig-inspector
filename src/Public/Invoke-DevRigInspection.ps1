@@ -15,7 +15,8 @@ function Invoke-DevRigInspection {
     $toolsResult = Get-DevelopmentToolInventory
     $computer = if ($systemResult.status -eq 'Available') { $systemResult.data } else { [pscustomobject]@{} }
     $tools = if ($toolsResult.status -eq 'Available') { @($toolsResult.data) } else { @() }
-    $inventory = New-InspectionResult -Computer $computer -Tools $tools -CollectorResults @($systemResult, $toolsResult)
+    $findings = Get-InventoryDiagnostics -Tools $tools
+    $inventory = New-InspectionResult -Computer $computer -Tools $tools -CollectorResults @($systemResult, $toolsResult) -Findings $findings
 
     if ($OutputPath) {
         $parent = Split-Path -Parent $OutputPath

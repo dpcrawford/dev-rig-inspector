@@ -18,17 +18,19 @@ function New-InspectionResult {
     param(
         [Parameter(Mandatory)] [object] $Computer,
         [Parameter(Mandatory)] [object[]] $Tools,
-        [Parameter(Mandatory)] [object[]] $CollectorResults
+        [Parameter(Mandatory)] [object[]] $CollectorResults,
+        [object[]] $Findings = @()
     )
 
     [pscustomobject]@{
         schemaVersion = '0.1'
-        collectorVersion = '0.1.0'
+        collectorVersion = '0.2.0'
         collectedAt = [DateTime]::UtcNow.ToString('o')
         computer = $Computer
         tools = @($Tools)
         diagnostics = [pscustomobject]@{
             collectorResults = @($CollectorResults)
+            findings = @($Findings)
         }
     }
 }

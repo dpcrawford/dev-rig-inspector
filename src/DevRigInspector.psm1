@@ -2,6 +2,9 @@ $implementationRoot = $PSScriptRoot
 
 @(
     'Private/New-InventoryResults.ps1'
+    'Private/New-DiagnosticFinding.ps1'
+    'Private/Get-PathDiagnostics.ps1'
+    'Private/Get-InventoryDiagnostics.ps1'
     'Private/Invoke-ExternalCommand.ps1'
     'Private/Resolve-ToolCommand.ps1'
     'Private/ConvertTo-InventoryJson.ps1'
