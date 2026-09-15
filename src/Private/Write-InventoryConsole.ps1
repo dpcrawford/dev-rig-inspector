@@ -43,6 +43,21 @@ function Write-InventoryConsole {
         Write-Host ('  GitHub auth:    {0}' -f $authStatus)
     }
 
+    $pythonHealth = $Inventory.diagnostics.health.python
+    if ($pythonHealth -and $pythonHealth.selected) {
+        Write-Host ''
+        Write-Host 'Python'
+        Write-Host ('  Active:         {0}' -f $pythonHealth.selected.version)
+        Write-Host ('  Executable:     {0}' -f $pythonHealth.selected.path)
+        $otherVersions = @($pythonHealth.runtimes | Where-Object { $_.path -ine $pythonHealth.selected.path } | Select-Object -ExpandProperty version -Unique)
+        Write-Host ('  Also found:     {0}' -f $(if ($otherVersions.Count -gt 0) { $otherVersions -join ', ' } else { 'None' }))
+        Write-Host ('  py launcher:    {0}' -f $(if ($pythonHealth.pyLauncher.available) { 'Available' } else { 'Unavailable' }))
+        Write-Host ('  uv:              {0}' -f $(if ($pythonHealth.uv.available) { $pythonHealth.uv.version } else { 'Unavailable' }))
+        $environment = if ($pythonHealth.virtualEnvironment.active) { $pythonHealth.virtualEnvironment.path } else { 'None active' }
+        Write-Host ('  Environment:    {0}' -f $environment)
+        Write-Host ('  pip:             {0}' -f $(if ($pythonHealth.pip.available) { 'Available' } else { 'Unavailable' }))
+    }
+
     Write-Host ''
     Write-Host 'Development tools'
     $shadowedComponents = @($Inventory.diagnostics.findings |

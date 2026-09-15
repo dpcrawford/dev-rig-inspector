@@ -20,10 +20,12 @@ function Invoke-DevRigInspection {
     $toolsResult = Get-DevelopmentToolInventory
     $powerShellHealthResult = Get-PowerShellHealthInventory
     $gitHealthResult = Get-GitHealthInventory
+    $pythonHealthResult = Get-PythonHealthInventory
     $computer = if ($systemResult.status -eq 'Available') { $systemResult.data } else { [pscustomobject]@{} }
     $tools = if ($toolsResult.status -eq 'Available') { @($toolsResult.data) } else { @() }
     $powerShellHealth = if ($powerShellHealthResult.status -eq 'Available') { $powerShellHealthResult.data } else { [pscustomobject]@{} }
     $gitHealth = if ($gitHealthResult.status -eq 'Available') { $gitHealthResult.data } else { [pscustomobject]@{} }
+    $pythonHealth = if ($pythonHealthResult.status -eq 'Available') { $pythonHealthResult.data } else { [pscustomobject]@{} }
     $findings = @(Get-InventoryDiagnostics -Tools $tools)
     if ($powerShellHealthResult.status -eq 'Available') {
         $findings += Get-PowerShellHealthDiagnostics -PowerShellHealth $powerShellHealth
@@ -31,9 +33,13 @@ function Invoke-DevRigInspection {
     if ($gitHealthResult.status -eq 'Available') {
         $findings += Get-GitHealthDiagnostics -GitHealth $gitHealth
     }
+    if ($pythonHealthResult.status -eq 'Available') {
+        $findings += Get-PythonHealthDiagnostics -PythonHealth $pythonHealth
+    }
     $health = [pscustomobject]@{
         powerShell = $powerShellHealth
         git = $gitHealth
+        python = $pythonHealth
     }
     $inventory = New-InspectionResult -Computer $computer -Tools $tools -CollectorResults @($systemResult, $toolsResult) -Findings $findings -Health $health
 
