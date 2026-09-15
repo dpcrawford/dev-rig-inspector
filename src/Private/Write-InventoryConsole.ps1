@@ -26,6 +26,23 @@ function Write-InventoryConsole {
         Write-Host ('  Pester:         {0}' -f $pesterVersion)
     }
 
+    $gitHealth = $Inventory.diagnostics.health.git
+    if ($gitHealth -and $gitHealth.git) {
+        Write-Host ''
+        Write-Host 'Git / GitHub'
+        Write-Host ('  Git:            {0}' -f $(if ($gitHealth.git.version) { $gitHealth.git.version -replace '^git version ', '' } else { 'Not found' }))
+        $identity = if ($gitHealth.git.identity.name.configured -and $gitHealth.git.identity.email.configured) { 'Explicitly configured' } else { 'Missing explicit configuration' }
+        Write-Host ('  Identity:       {0}' -f $identity)
+        $defaultBranch = if ($gitHealth.git.defaultBranch.configured) { $gitHealth.git.defaultBranch.value } else { 'Not configured' }
+        Write-Host ('  Default branch: {0}' -f $defaultBranch)
+        $autocrlf = if ($gitHealth.git.autocrlf.configured) { $gitHealth.git.autocrlf.value } else { 'Not configured' }
+        Write-Host ('  Line endings:   {0}' -f $autocrlf)
+        $ghVersion = if ($gitHealth.githubCli.version) { $gitHealth.githubCli.version -replace '^gh version\s+', '' -replace '\s+.*$', '' } else { 'Not found' }
+        Write-Host ('  GitHub CLI:     {0}' -f $ghVersion)
+        $authStatus = if ($gitHealth.githubCli.authentication.authenticated) { 'Authenticated' } elseif ($gitHealth.githubCli.authentication.checked) { 'Not authenticated' } else { 'Unavailable' }
+        Write-Host ('  GitHub auth:    {0}' -f $authStatus)
+    }
+
     Write-Host ''
     Write-Host 'Development tools'
     $shadowedComponents = @($Inventory.diagnostics.findings |

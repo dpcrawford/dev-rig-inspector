@@ -19,15 +19,21 @@ function Invoke-DevRigInspection {
     $systemResult = Get-SystemInventory
     $toolsResult = Get-DevelopmentToolInventory
     $powerShellHealthResult = Get-PowerShellHealthInventory
+    $gitHealthResult = Get-GitHealthInventory
     $computer = if ($systemResult.status -eq 'Available') { $systemResult.data } else { [pscustomobject]@{} }
     $tools = if ($toolsResult.status -eq 'Available') { @($toolsResult.data) } else { @() }
     $powerShellHealth = if ($powerShellHealthResult.status -eq 'Available') { $powerShellHealthResult.data } else { [pscustomobject]@{} }
+    $gitHealth = if ($gitHealthResult.status -eq 'Available') { $gitHealthResult.data } else { [pscustomobject]@{} }
     $findings = @(Get-InventoryDiagnostics -Tools $tools)
     if ($powerShellHealthResult.status -eq 'Available') {
         $findings += Get-PowerShellHealthDiagnostics -PowerShellHealth $powerShellHealth
     }
+    if ($gitHealthResult.status -eq 'Available') {
+        $findings += Get-GitHealthDiagnostics -GitHealth $gitHealth
+    }
     $health = [pscustomobject]@{
         powerShell = $powerShellHealth
+        git = $gitHealth
     }
     $inventory = New-InspectionResult -Computer $computer -Tools $tools -CollectorResults @($systemResult, $toolsResult) -Findings $findings -Health $health
 
