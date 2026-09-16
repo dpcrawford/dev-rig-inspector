@@ -18,11 +18,15 @@ function Compare-DevRigInspection {
         [object] $Current,
 
         [switch] $JsonOnly,
-        [switch] $PassThru
+        [switch] $PassThru,
+        [string] $ReportPath
     )
 
     if ($JsonOnly -and $PassThru) {
         throw 'JsonOnly and PassThru cannot be used together.'
+    }
+    if ($JsonOnly -and $ReportPath) {
+        throw 'JsonOnly and ReportPath cannot be used together.'
     }
 
     $referenceSnapshot = if ($PSCmdlet.ParameterSetName -in @('PathPath', 'PathObject')) {
@@ -48,6 +52,12 @@ function Compare-DevRigInspection {
 
     if ($JsonOnly) {
         return $comparison | ConvertTo-Json -Depth 12
+    }
+
+    if ($ReportPath) {
+        $parent = Split-Path -Parent $ReportPath
+        if ($parent) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
+        ConvertTo-ComparisonMarkdown -Comparison $comparison | Set-Content -LiteralPath $ReportPath -Encoding utf8
     }
 
     Write-ComparisonConsole -Comparison $comparison

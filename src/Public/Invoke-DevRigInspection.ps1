@@ -2,6 +2,7 @@ function Invoke-DevRigInspection {
     [CmdletBinding()]
     param(
         [string] $OutputPath,
+        [string] $ReportPath,
         [string] $LogPath,
         [switch] $JsonOnly,
         [switch] $PassThru
@@ -9,6 +10,9 @@ function Invoke-DevRigInspection {
 
     if ($JsonOnly -and $PassThru) {
         throw 'JsonOnly and PassThru cannot be used together.'
+    }
+    if ($JsonOnly -and $ReportPath) {
+        throw 'JsonOnly and ReportPath cannot be used together.'
     }
 
     if ($LogPath) {
@@ -60,6 +64,12 @@ function Invoke-DevRigInspection {
         if ($parent) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
         ConvertTo-InventoryJson -Inventory $inventory | Set-Content -LiteralPath $OutputPath -Encoding utf8
         Write-InventoryLog -Message "JSON written to $OutputPath." -Path $LogPath
+    }
+    if ($ReportPath) {
+        $parent = Split-Path -Parent $ReportPath
+        if ($parent) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
+        ConvertTo-InventoryMarkdown -Inventory $inventory | Set-Content -LiteralPath $ReportPath -Encoding utf8
+        Write-InventoryLog -Message "Markdown report written to $ReportPath." -Path $LogPath
     }
     if ($JsonOnly) {
         Write-InventoryLog -Message 'Inspection completed.' -Path $LogPath
