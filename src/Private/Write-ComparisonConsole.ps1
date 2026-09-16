@@ -68,13 +68,21 @@ function Get-HealthFieldLabel {
     if ($labels.ContainsKey($Field)) { $labels[$Field] } else { $Field }
 }
 
+function Get-ComparisonSourceLabel {
+    param([object] $Source)
+    if ($Source.sourceType -eq 'Object' -or [string]::IsNullOrWhiteSpace($Source.path)) {
+        return 'in-memory snapshot'
+    }
+    Split-Path -Leaf $Source.path
+}
+
 function Write-ComparisonConsole {
     param([Parameter(Mandatory)] [object] $Comparison)
 
     Write-Host 'Dev Rig Inspector Comparison'
     Write-Host ''
-    Write-Host ('Reference: {0}' -f (Split-Path -Leaf $Comparison.reference.path))
-    Write-Host ('Current:   {0}' -f (Split-Path -Leaf $Comparison.current.path))
+    Write-Host ('Reference: {0}' -f (Get-ComparisonSourceLabel $Comparison.reference))
+    Write-Host ('Current:   {0}' -f (Get-ComparisonSourceLabel $Comparison.current))
     $machineLabel = switch ($Comparison.machineIdentity.state) {
         'LikelySame' { 'Likely same workstation' }
         'PossiblySame' { 'Possibly the same workstation' }

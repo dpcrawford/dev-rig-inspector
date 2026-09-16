@@ -1,8 +1,22 @@
 function Compare-DevRigInspection {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'PathPath')]
     param(
-        [Parameter(Mandatory)] [string] $ReferencePath,
-        [Parameter(Mandatory)] [string] $CurrentPath,
+        [Parameter(Mandatory, ParameterSetName = 'PathPath')]
+        [Parameter(Mandatory, ParameterSetName = 'PathObject')]
+        [string] $ReferencePath,
+
+        [Parameter(Mandatory, ParameterSetName = 'ObjectPath')]
+        [Parameter(Mandatory, ParameterSetName = 'ObjectObject')]
+        [object] $Reference,
+
+        [Parameter(Mandatory, ParameterSetName = 'PathPath')]
+        [Parameter(Mandatory, ParameterSetName = 'ObjectPath')]
+        [string] $CurrentPath,
+
+        [Parameter(Mandatory, ParameterSetName = 'PathObject')]
+        [Parameter(Mandatory, ParameterSetName = 'ObjectObject')]
+        [object] $Current,
+
         [switch] $JsonOnly,
         [switch] $PassThru
     )
@@ -11,16 +25,26 @@ function Compare-DevRigInspection {
         throw 'JsonOnly and PassThru cannot be used together.'
     }
 
-    $reference = Read-InventorySnapshot -Path $ReferencePath -Label 'reference'
-    $current = Read-InventorySnapshot -Path $CurrentPath -Label 'current'
-    $changes = Compare-InventoryState -Reference $reference -Current $current
-    $healthChanges = Compare-HealthState -Reference $reference.health -Current $current.health
+    $referenceSnapshot = if ($PSCmdlet.ParameterSetName -in @('PathPath', 'PathObject')) {
+        Read-InventorySnapshot -Path $ReferencePath -Label 'reference'
+    } else {
+        ConvertTo-ValidatedInventorySnapshot -Inventory $Reference -Label 'reference' -Path $null -SourceType 'Object'
+    }
+
+    $currentSnapshot = if ($PSCmdlet.ParameterSetName -in @('PathPath', 'ObjectPath')) {
+        Read-InventorySnapshot -Path $CurrentPath -Label 'current'
+    } else {
+        ConvertTo-ValidatedInventorySnapshot -Inventory $Current -Label 'current' -Path $null -SourceType 'Object'
+    }
+
+    $changes = Compare-InventoryState -Reference $referenceSnapshot -Current $currentSnapshot
+    $healthChanges = Compare-HealthState -Reference $referenceSnapshot.health -Current $currentSnapshot.health
     $changes = [pscustomobject]@{
         tools = $changes.tools
         findings = $changes.findings
         health = $healthChanges
     }
-    $comparison = New-ComparisonResult -Reference $reference -Current $current -Changes $changes
+    $comparison = New-ComparisonResult -Reference $referenceSnapshot -Current $currentSnapshot -Changes $changes
 
     if ($JsonOnly) {
         return $comparison | ConvertTo-Json -Depth 12

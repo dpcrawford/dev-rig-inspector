@@ -230,7 +230,9 @@ function ConvertTo-ComparableVirtualizationHealth {
 function ConvertTo-ComparableInventory {
     param(
         [Parameter(Mandatory)] [object] $Inventory,
-        [Parameter(Mandatory)] [string] $Path
+        # $null for object-sourced snapshots; never a fabricated path.
+        $Path,
+        [ValidateSet('File', 'Object')] [string] $SourceType = 'File'
     )
 
     $tools = @($Inventory.tools | ForEach-Object {
@@ -264,6 +266,7 @@ function ConvertTo-ComparableInventory {
     }
 
     [pscustomobject]@{
+        sourceType = $SourceType
         path = $Path
         collectedAt = $Inventory.collectedAt
         schemaVersion = [string] $Inventory.schemaVersion

@@ -85,6 +85,7 @@ function New-ComparisonResult {
         comparisonSchemaVersion = '0.1'
         comparisonVersion = '0.4.0'
         reference = [pscustomobject]@{
+            sourceType = $Reference.sourceType
             path = $Reference.path
             collectedAt = $Reference.collectedAt
             hostname = $Reference.hostname
@@ -92,6 +93,7 @@ function New-ComparisonResult {
             collectorVersion = $Reference.collectorVersion
         }
         current = [pscustomobject]@{
+            sourceType = $Current.sourceType
             path = $Current.path
             collectedAt = $Current.collectedAt
             hostname = $Current.hostname
