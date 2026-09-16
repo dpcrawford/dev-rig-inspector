@@ -1,6 +1,29 @@
 function Write-InventoryConsole {
     param([Parameter(Mandatory)] [object] $Inventory)
 
+    $summary = $Inventory.diagnostics.summary
+    if ($summary) {
+        Write-Host 'Dev Rig Inspector'
+        Write-Host ''
+        Write-Host ('Overall: {0}' -f $summary.status)
+        Write-Host ('Errors: {0}   Warnings: {1}   Info: {2}' -f $summary.errorCount, $summary.warningCount, $summary.infoCount)
+
+        $attentionItems = @($summary.attention)
+        if ($attentionItems.Count -gt 0) {
+            Write-Host ''
+            Write-Host 'ATTENTION'
+            Write-Host ''
+            foreach ($item in $attentionItems) {
+                $finding = Resolve-SummaryAttentionFinding -Findings $Inventory.diagnostics.findings -AttentionItem $item
+                $detail = if ($finding) { $finding.message } else { $item.title }
+                Write-Host ('{0,-8} {1}' -f $item.severity.ToUpperInvariant(), $item.title)
+                Write-Host ('         {0}' -f $detail)
+                Write-Host ''
+            }
+        }
+        Write-Host ''
+    }
+
     Write-Host 'System'
     Write-Host ('  Hostname:       {0}' -f $Inventory.computer.hostname)
     Write-Host ('  Windows:        {0} (build {1})' -f $Inventory.computer.windows.productName, $Inventory.computer.windows.buildNumber)

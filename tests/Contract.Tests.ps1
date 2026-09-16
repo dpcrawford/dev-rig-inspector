@@ -6,7 +6,7 @@ Describe 'Inspection contract' {
         $json = Invoke-DevRigInspection -JsonOnly
         $inventory = $json | ConvertFrom-Json
         $inventory.schemaVersion | Should Be '0.1'
-        $inventory.collectorVersion | Should Be '0.3.0'
+        $inventory.collectorVersion | Should Be '0.4.0'
         $inventory.tools.Count | Should Be 9
         $inventory.diagnostics.collectorResults.Count | Should Be 2
     }
@@ -19,7 +19,7 @@ Describe 'Inspection contract' {
     It 'returns the inventory object only with PassThru' {
         $result = Invoke-DevRigInspection -PassThru
         $result.schemaVersion | Should Be '0.1'
-        $result.collectorVersion | Should Be '0.3.0'
+        $result.collectorVersion | Should Be '0.4.0'
     }
 
     It 'writes JSON to OutputPath without returning the inventory object' {
@@ -28,7 +28,7 @@ Describe 'Inspection contract' {
             $result = Invoke-DevRigInspection -OutputPath $outputPath
             $result | Should Be $null
             $inventory = Get-Content -LiteralPath $outputPath -Raw | ConvertFrom-Json
-            $inventory.collectorVersion | Should Be '0.3.0'
+            $inventory.collectorVersion | Should Be '0.4.0'
         } finally {
             Remove-Item -LiteralPath $outputPath -Force -ErrorAction SilentlyContinue
         }
