@@ -24,6 +24,7 @@ Describe 'Build-ModulePackage' {
         Test-Path (Join-Path $stagingDir 'Public') | Should Be $true
         Test-Path (Join-Path $stagingDir 'Private') | Should Be $true
         Test-Path (Join-Path $stagingDir 'Collectors') | Should Be $true
+        Test-Path (Join-Path $stagingDir 'docs\privacy.md') | Should Be $true
     }
 
     It 'creates the versioned ZIP' {
@@ -34,7 +35,6 @@ Describe 'Build-ModulePackage' {
         Test-Path (Join-Path $stagingDir 'tests') | Should Be $false
         Test-Path (Join-Path $stagingDir '.git') | Should Be $false
         Test-Path (Join-Path $stagingDir 'scripts') | Should Be $false
-        Test-Path (Join-Path $stagingDir 'docs') | Should Be $false
         Test-Path (Join-Path $stagingDir 'output') | Should Be $false
         Test-Path (Join-Path $stagingDir 'Start-DevRigInspector.ps1') | Should Be $false
         Test-Path (Join-Path $stagingDir 'Start-DevRigInspector.cmd') | Should Be $false

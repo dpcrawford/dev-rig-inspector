@@ -10,7 +10,7 @@
         PSData = @{
             Tags = @('Windows', 'PowerShell', 'Diagnostics', 'DeveloperTools', 'Inventory', 'Health')
             ProjectUri = 'https://github.com/dpcrawford/dev-rig-inspector'
-            ReleaseNotes = 'v0.5.0: PowerShell 7 runtime/installation UX and versioned module packaging.'
+            ReleaseNotes = 'v0.5.0: PowerShell 7 runtime guidance, versioned packaging, inventory schema 0.2 privacy hardening, and operator documentation/help.'
         }
     }
 }

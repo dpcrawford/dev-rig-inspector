@@ -1,4 +1,52 @@
 function Invoke-DevRigInspection {
+    <#
+    .SYNOPSIS
+    Inspects a Windows development workstation without changing its configuration.
+    .DESCRIPTION
+    Collects system and development-tool inventory and subsystem health evidence,
+    derives diagnostic findings and a summary, and renders a console report.
+    Optional JSON, Markdown, and progress-log files are written only when requested.
+    Missing optional capabilities and unavailable evidence are not automatically errors.
+    .PARAMETER OutputPath
+    Writes inventory JSON to this path, creating parent directories if needed.
+    Overwrites an existing file. May be combined with ReportPath or JsonOnly.
+    .PARAMETER ReportPath
+    Writes a Markdown inventory report, creating parent directories if needed.
+    Overwrites an existing file. Cannot be combined with JsonOnly.
+    .PARAMETER LogPath
+    Appends timestamped inspection progress and report locations to a log file.
+    Creates parent directories if needed. Does not enable raw probe logging.
+    .PARAMETER JsonOnly
+    Returns inventory JSON as a string and skips the console report.
+    Cannot be combined with PassThru or ReportPath. Supports OutputPath and LogPath.
+    .PARAMETER PassThru
+    Returns the inventory object in addition to rendering the console report.
+    Cannot be combined with JsonOnly.
+    .EXAMPLE
+    Invoke-DevRigInspection
+
+    Displays the current workstation report.
+    .EXAMPLE
+    $inventory = Invoke-DevRigInspection -PassThru
+
+    Keeps the structured inventory for further inspection or comparison.
+    .EXAMPLE
+    Invoke-DevRigInspection -OutputPath .\inventory.json -ReportPath .\report.md
+
+    Saves JSON and Markdown from the same collection and displays the report.
+    .EXAMPLE
+    $json = Invoke-DevRigInspection -JsonOnly
+
+    Captures JSON without the console report.
+    .OUTPUTS
+    None by default. System.Management.Automation.PSCustomObject with PassThru.
+    System.String with JsonOnly. Console rendering uses the information stream.
+    .NOTES
+    Requires Windows and PowerShell 7.0+. Windows PowerShell 5.1 is unsupported.
+    Inventory schema 0.2; collector version 0.5.0. Reports contain identifying
+    workstation metadata and are not anonymous. No automatic remediation occurs.
+    Requested report/log files are expected outputs. See docs/privacy.md.
+    #>
     [CmdletBinding()]
     param(
         [string] $OutputPath,

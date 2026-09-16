@@ -28,7 +28,7 @@ if (Test-Path -LiteralPath $distRoot) {
 }
 New-Item -ItemType Directory -Path $stagingDir -Force | Out-Null
 
-# Copy only the files required at runtime; tests/docs/scripts/output/.git are never touched.
+# Copy runtime files and operator documentation; tests/scripts/output/.git are excluded.
 Copy-Item -LiteralPath (Join-Path $srcRoot 'DevRigInspector.psd1') -Destination $stagingDir
 Copy-Item -LiteralPath (Join-Path $srcRoot 'DevRigInspector.psm1') -Destination $stagingDir
 Copy-Item -LiteralPath (Join-Path $srcRoot 'Public') -Destination $stagingDir -Recurse
@@ -38,6 +38,10 @@ Copy-Item -LiteralPath (Join-Path $srcRoot 'Collectors') -Destination $stagingDi
 $readmePath = Join-Path -Path $repoRoot -ChildPath 'README.md'
 if (Test-Path -LiteralPath $readmePath) {
     Copy-Item -LiteralPath $readmePath -Destination $stagingDir
+}
+$docsPath = Join-Path -Path $repoRoot -ChildPath 'docs'
+if (Test-Path -LiteralPath $docsPath) {
+    Copy-Item -LiteralPath $docsPath -Destination $stagingDir -Recurse
 }
 $licensePath = Join-Path -Path $repoRoot -ChildPath 'LICENSE'
 if (Test-Path -LiteralPath $licensePath) {
