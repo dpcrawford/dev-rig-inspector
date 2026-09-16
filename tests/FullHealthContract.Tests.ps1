@@ -22,7 +22,7 @@ Describe 'Full v0.3 health contract' {
 
             $inventory = Invoke-DevRigInspection -PassThru 6>$null
             $inventory.schemaVersion | Should Be '0.1'
-            $inventory.collectorVersion | Should Be '0.3.0'
+            $inventory.collectorVersion | Should Be '0.4.0'
             $null -ne $inventory.computer | Should Be $true
             $null -ne $inventory.tools | Should Be $true
             $inventory.diagnostics.collectorResults.Count | Should Be 2

@@ -15,6 +15,12 @@ $implementationRoot = $PSScriptRoot
     'Private/ConvertTo-InventoryJson.ps1'
     'Private/Write-InventoryLog.ps1'
     'Private/Write-InventoryConsole.ps1'
+    'Private/Get-FindingIdentity.ps1'
+    'Private/ConvertTo-ComparableInventory.ps1'
+    'Private/Read-InventorySnapshot.ps1'
+    'Private/Compare-InventoryState.ps1'
+    'Private/New-ComparisonResult.ps1'
+    'Private/Write-ComparisonConsole.ps1'
     'Collectors/ToolDefinitions.psd1'
     'Collectors/Get-SystemInventory.ps1'
     'Collectors/Get-DevelopmentToolInventory.ps1'
@@ -24,6 +30,7 @@ $implementationRoot = $PSScriptRoot
     'Collectors/Get-NodeHealthInventory.ps1'
     'Collectors/Get-VirtualizationHealthInventory.ps1'
     'Public/Invoke-DevRigInspection.ps1'
+    'Public/Compare-DevRigInspection.ps1'
 ) | ForEach-Object {
     $path = Join-Path $implementationRoot $_
     if ($_.EndsWith('.psd1')) {
@@ -33,4 +40,4 @@ $implementationRoot = $PSScriptRoot
     }
 }
 
-Export-ModuleMember -Function Invoke-DevRigInspection
+Export-ModuleMember -Function Invoke-DevRigInspection, Compare-DevRigInspection
