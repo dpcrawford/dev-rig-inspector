@@ -78,6 +78,8 @@ function New-ComparisonResult {
     $newFindings = @($Changes.findings | Where-Object kind -eq 'NewFinding').Count
     $resolvedFindings = @($Changes.findings | Where-Object kind -eq 'ResolvedFinding').Count
     $severityChanges = @($Changes.findings | Where-Object kind -eq 'SeverityChanged').Count
+    $healthChanges = @($Changes.health).Count
+    $healthSubsystemsChanged = @($Changes.health | Select-Object -ExpandProperty subsystem -Unique).Count
 
     [pscustomobject]@{
         comparisonSchemaVersion = '0.1'
@@ -100,6 +102,7 @@ function New-ComparisonResult {
         changes = [pscustomobject]@{
             tools = @($Changes.tools)
             findings = @($Changes.findings)
+            health = @($Changes.health)
         }
         summary = [pscustomobject]@{
             toolsAdded = $toolsAdded
@@ -108,7 +111,9 @@ function New-ComparisonResult {
             newFindings = $newFindings
             resolvedFindings = $resolvedFindings
             severityChanges = $severityChanges
-            totalChanges = $toolsAdded + $toolsRemoved + $toolsChanged + $newFindings + $resolvedFindings + $severityChanges
+            healthChanges = $healthChanges
+            healthSubsystemsChanged = $healthSubsystemsChanged
+            totalChanges = $toolsAdded + $toolsRemoved + $toolsChanged + $newFindings + $resolvedFindings + $severityChanges + $healthChanges
         }
     }
 }

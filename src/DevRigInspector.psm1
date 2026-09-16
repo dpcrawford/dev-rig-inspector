@@ -19,6 +19,7 @@ $implementationRoot = $PSScriptRoot
     'Private/ConvertTo-ComparableInventory.ps1'
     'Private/Read-InventorySnapshot.ps1'
     'Private/Compare-InventoryState.ps1'
+    'Private/Compare-HealthState.ps1'
     'Private/New-ComparisonResult.ps1'
     'Private/Write-ComparisonConsole.ps1'
     'Collectors/ToolDefinitions.psd1'
