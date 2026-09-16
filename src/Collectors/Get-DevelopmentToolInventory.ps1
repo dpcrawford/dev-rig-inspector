@@ -19,8 +19,6 @@ function Get-DevelopmentToolInventory {
                 selectedCommand = $null
                 allCommandCandidates = @()
                 version = $null
-                rawVersion = $null
-                command = $null
                 diagnostics = $diagnostics
                 error = $null
             }
@@ -28,9 +26,10 @@ function Get-DevelopmentToolInventory {
         }
 
         try {
+            # Raw stdout/stderr/exitCode stop here; only the derived version/status/error are part of the public contract.
             $execution = Invoke-ExternalCommand -FilePath $resolution.selected.path -Arguments $definition.VersionArguments
             $rawVersion = ($execution.standardOutput + "`n" + $execution.standardError).Trim()
-            $version = if ($rawVersion -match '(?<!\d)(\d+\.\d+(?:\.\d+){0,2})') { $Matches[1] } else { $rawVersion }
+            $version = if ($rawVersion -match '(?<!\d)(\d+\.\d+(?:\.\d+){0,2})') { $Matches[1] } else { $null }
             $status = if ($execution.timedOut) { 'TimedOut' } elseif ($execution.exitCode -eq 0) { 'Available' } else { 'Error' }
 
             [pscustomobject]@{
@@ -40,10 +39,8 @@ function Get-DevelopmentToolInventory {
                 selectedCommand = $resolution.selected
                 allCommandCandidates = $resolution.candidates
                 version = $version
-                rawVersion = $rawVersion
-                command = $execution
                 diagnostics = $diagnostics
-                error = if ($status -eq 'Error') { $execution.standardError.Trim() } else { $null }
+                error = if ($status -eq 'Error') { 'Version probe failed.' } elseif ($status -eq 'TimedOut') { 'Version probe timed out.' } else { $null }
             }
         } catch {
             [pscustomobject]@{
@@ -53,10 +50,8 @@ function Get-DevelopmentToolInventory {
                 selectedCommand = $resolution.selected
                 allCommandCandidates = $resolution.candidates
                 version = $null
-                rawVersion = $null
-                command = $null
                 diagnostics = $diagnostics
-                error = $_.Exception.Message
+                error = 'Version probe could not be completed.'
             }
         }
     }

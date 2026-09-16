@@ -5,7 +5,7 @@ Describe 'Inspection contract' {
     It 'produces a versioned JSON document with all configured tools' {
         $json = Invoke-DevRigInspection -JsonOnly
         $inventory = $json | ConvertFrom-Json
-        $inventory.schemaVersion | Should Be '0.1'
+        $inventory.schemaVersion | Should Be '0.2'
         $inventory.collectorVersion | Should Be '0.5.0'
         $inventory.tools.Count | Should Be 9
         $inventory.diagnostics.collectorResults.Count | Should Be 2
@@ -18,7 +18,7 @@ Describe 'Inspection contract' {
 
     It 'returns the inventory object only with PassThru' {
         $result = Invoke-DevRigInspection -PassThru
-        $result.schemaVersion | Should Be '0.1'
+        $result.schemaVersion | Should Be '0.2'
         $result.collectorVersion | Should Be '0.5.0'
     }
 

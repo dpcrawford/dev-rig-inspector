@@ -64,6 +64,24 @@ Describe 'Build-ModulePackage' {
         $output.Trim() | Should Be $expectedVersion
     }
 
+    It 'emits the current schema version and no raw tool probe fields from the packaged module' {
+        Push-Location $env:TEMP
+        try {
+            $output = & pwsh -NoLogo -NoProfile -Command "Import-Module '$stagingDir\DevRigInspector.psd1' -Force; `$json = Invoke-DevRigInspection -JsonOnly 6>`$null; `$json" 2>&1 | Out-String
+        } finally {
+            Pop-Location
+        }
+        $inventory = $output | ConvertFrom-Json
+        $inventory.schemaVersion | Should Be '0.2'
+        # Scoped to the tools[] array specifically; other objects (e.g. WSL evidence) legitimately have unrelated "command" properties.
+        foreach ($tool in @($inventory.tools)) {
+            ($tool.PSObject.Properties.Name -contains 'command') | Should Be $false
+            ($tool.PSObject.Properties.Name -contains 'rawVersion') | Should Be $false
+        }
+        $output | Should Not Match '"standardOutput"\s*:'
+        $output | Should Not Match '"standardError"\s*:'
+    }
+
     It 'does not modify any source file' {
         $afterHashes = @(Get-ChildItem -Path (Join-Path $repoRoot 'src') -Recurse -File | Sort-Object FullName | ForEach-Object {
             [pscustomobject]@{ Path = $_.FullName; Hash = (Get-FileHash -Path $_.FullName -Algorithm SHA256).Hash }

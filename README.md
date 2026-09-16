@@ -93,6 +93,14 @@ New-Item -ItemType Directory -Path $moduleRoot -Force
 Copy-Item .\dist\DevRigInspector-0.5.0\* -Destination $moduleRoot -Recurse
 ```
 
+## JSON contract
+
+Inventory JSON is currently `schemaVersion = 0.2`. `Compare-DevRigInspection` also accepts historical `schemaVersion = 0.1` inventories (produced by v0.3/v0.4) so older baselines remain usable for comparison.
+
+Raw external-command output (stdout/stderr/exit code from version-probe commands) is **not** part of the public inventory contract. Tool entries report curated fields (`id`, `displayName`, `status`, `version`, `selectedCommand`, `allCommandCandidates`, `diagnostics`, `error`) derived from that probe, not the raw process result itself.
+
+The 0.2 schema removes the previously serialized `tools[].command` and `tools[].rawVersion` fields. Unrecognized tool versions are `null`, and tool probe errors use fixed messages rather than stdout, stderr, or exception text. Comparisons normalize both supported inventory schemas to the same curated fields, ignoring legacy raw fields; no baseline rewrite is required. The comparison schema remains `0.1` because its output contract is unchanged.
+
 ## Troubleshooting
 
 **`Import-Module` fails with "requires a minimum Windows PowerShell version of '7.0'"**
