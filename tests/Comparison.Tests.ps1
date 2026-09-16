@@ -243,7 +243,7 @@ Describe 'Compare-DevRigInspection' {
         $json.GetType().Name | Should Be 'String'
         $parsed = $json | ConvertFrom-Json
         $parsed.comparisonSchemaVersion | Should Be '0.1'
-        $parsed.comparisonVersion | Should Be '0.4.0'
+        $parsed.comparisonVersion | Should Be '0.5.0'
     }
 
     It 'rejects conflicting PassThru and JsonOnly modes' {
