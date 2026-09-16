@@ -16,30 +16,33 @@ function ConvertTo-InventoryMarkdown {
     $lines.Add('')
 
     $findings = @($Inventory.diagnostics.findings)
-    $errorFindings = @($findings | Where-Object severity -eq 'Error')
-    $warningFindings = @($findings | Where-Object severity -eq 'Warning')
+    # Defensive fallback for hand-built inventories that predate the summary field; production always populates it.
+    $summary = if ($Inventory.diagnostics.summary) { $Inventory.diagnostics.summary } else { New-DiagnosticSummary -Findings $findings }
     $infoFindings = @($findings | Where-Object severity -eq 'Info')
 
     $lines.Add('## Summary')
     $lines.Add('')
-    $lines.Add(('- Errors: {0}' -f $errorFindings.Count))
-    $lines.Add(('- Warnings: {0}' -f $warningFindings.Count))
-    $lines.Add(('- Informational findings: {0}' -f $infoFindings.Count))
+    $lines.Add(('- Errors: {0}' -f $summary.errorCount))
+    $lines.Add(('- Warnings: {0}' -f $summary.warningCount))
+    $lines.Add(('- Informational findings: {0}' -f $summary.infoCount))
     $lines.Add('')
 
-    $attentionFindings = @($errorFindings) + @($warningFindings)
-    if ($attentionFindings.Count -gt 0) {
+    $attentionItems = @($summary.attention)
+    if ($attentionItems.Count -gt 0) {
         $lines.Add('## Attention Required')
         $lines.Add('')
-        foreach ($finding in $attentionFindings) {
-            $lines.Add(('### {0}: {1}' -f $finding.severity, (ConvertTo-MarkdownText $finding.title)))
+        foreach ($item in $attentionItems) {
+            $finding = Resolve-SummaryAttentionFinding -Findings $findings -AttentionItem $item
+            $lines.Add(('### {0}: {1}' -f $item.severity, (ConvertTo-MarkdownText $item.title)))
             $lines.Add('')
-            $lines.Add(('**Component:** {0}' -f (ConvertTo-MarkdownCode $finding.affectedComponent)))
+            $lines.Add(('**Component:** {0}' -f (ConvertTo-MarkdownCode $item.affectedComponent)))
             $lines.Add('')
-            $lines.Add((ConvertTo-MarkdownParagraph $finding.message))
-            $lines.Add('')
-            $lines.Add(('**Recommendation:** {0}' -f (ConvertTo-MarkdownText $finding.recommendation)))
-            $lines.Add('')
+            if ($finding) {
+                $lines.Add((ConvertTo-MarkdownParagraph $finding.message))
+                $lines.Add('')
+                $lines.Add(('**Recommendation:** {0}' -f (ConvertTo-MarkdownText $finding.recommendation)))
+                $lines.Add('')
+            }
         }
     }
 

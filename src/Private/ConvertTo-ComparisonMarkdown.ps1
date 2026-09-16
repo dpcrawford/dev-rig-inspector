@@ -52,6 +52,19 @@ function ConvertTo-ComparisonMarkdown {
         }
     }
 
+    if ($severityChanges.Count -gt 0) {
+        $lines.Add('## Severity Changes')
+        $lines.Add('')
+        foreach ($finding in $severityChanges) {
+            $lines.Add(('### {0}' -f (ConvertTo-MarkdownText $finding.code)))
+            $lines.Add('')
+            $lines.Add(('**Component:** {0}' -f (ConvertTo-MarkdownCode $finding.affectedComponent)))
+            $lines.Add('')
+            $lines.Add(('{0} → {1}' -f (ConvertTo-MarkdownCode $finding.severityBefore), (ConvertTo-MarkdownCode $finding.severityAfter)))
+            $lines.Add('')
+        }
+    }
+
     if ($resolvedFindings.Count -gt 0) {
         $lines.Add('## Resolved')
         $lines.Add('')
@@ -65,16 +78,27 @@ function ConvertTo-ComparisonMarkdown {
         }
     }
 
-    if ($severityChanges.Count -gt 0) {
-        $lines.Add('## Severity Changes')
+    $healthChanges = @($Comparison.changes.health)
+    if ($healthChanges.Count -gt 0) {
+        $lines.Add('## Health Changes')
         $lines.Add('')
-        foreach ($finding in $severityChanges) {
-            $lines.Add(('### {0}' -f (ConvertTo-MarkdownText $finding.code)))
+        foreach ($group in ($healthChanges | Group-Object subsystem)) {
+            $lines.Add(('### {0}' -f (ConvertTo-MarkdownText (Get-HealthSubsystemLabel $group.Name))))
             $lines.Add('')
-            $lines.Add(('**Component:** {0}' -f (ConvertTo-MarkdownCode $finding.affectedComponent)))
-            $lines.Add('')
-            $lines.Add(('{0} → {1}' -f (ConvertTo-MarkdownCode $finding.severityBefore), (ConvertTo-MarkdownCode $finding.severityAfter)))
-            $lines.Add('')
+            foreach ($item in @($group.Group | Where-Object kind -eq 'Changed')) {
+                $lines.Add(('**{0}**' -f (ConvertTo-MarkdownText (Get-HealthFieldLabel $item.field))))
+                $lines.Add('')
+                $lines.Add(('{0} → {1}' -f (ConvertTo-MarkdownCode $item.before), (ConvertTo-MarkdownCode $item.after)))
+                $lines.Add('')
+            }
+            foreach ($item in @($group.Group | Where-Object kind -eq 'Added')) {
+                $lines.Add(('Added: {0}' -f (ConvertTo-MarkdownCode $item.after)))
+                $lines.Add('')
+            }
+            foreach ($item in @($group.Group | Where-Object kind -eq 'Removed')) {
+                $lines.Add(('Removed: {0}' -f (ConvertTo-MarkdownCode $item.before)))
+                $lines.Add('')
+            }
         }
     }
 
@@ -104,30 +128,6 @@ function ConvertTo-ComparisonMarkdown {
             $lines.Add('')
             $lines.Add('Removed.')
             $lines.Add('')
-        }
-    }
-
-    $healthChanges = @($Comparison.changes.health)
-    if ($healthChanges.Count -gt 0) {
-        $lines.Add('## Health Changes')
-        $lines.Add('')
-        foreach ($group in ($healthChanges | Group-Object subsystem)) {
-            $lines.Add(('### {0}' -f (ConvertTo-MarkdownText (Get-HealthSubsystemLabel $group.Name))))
-            $lines.Add('')
-            foreach ($item in @($group.Group | Where-Object kind -eq 'Changed')) {
-                $lines.Add(('**{0}**' -f (ConvertTo-MarkdownText (Get-HealthFieldLabel $item.field))))
-                $lines.Add('')
-                $lines.Add(('{0} → {1}' -f (ConvertTo-MarkdownCode $item.before), (ConvertTo-MarkdownCode $item.after)))
-                $lines.Add('')
-            }
-            foreach ($item in @($group.Group | Where-Object kind -eq 'Added')) {
-                $lines.Add(('Added: {0}' -f (ConvertTo-MarkdownCode $item.after)))
-                $lines.Add('')
-            }
-            foreach ($item in @($group.Group | Where-Object kind -eq 'Removed')) {
-                $lines.Add(('Removed: {0}' -f (ConvertTo-MarkdownCode $item.before)))
-                $lines.Add('')
-            }
         }
     }
 

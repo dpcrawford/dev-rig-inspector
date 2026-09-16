@@ -97,6 +97,66 @@ function Write-ComparisonConsole {
         return
     }
 
+    $newFindings = @($Comparison.changes.findings | Where-Object kind -eq 'NewFinding')
+    $resolvedFindings = @($Comparison.changes.findings | Where-Object kind -eq 'ResolvedFinding')
+    $severityChanges = @($Comparison.changes.findings | Where-Object kind -eq 'SeverityChanged')
+
+    if ($newFindings.Count -gt 0 -or $resolvedFindings.Count -gt 0 -or $severityChanges.Count -gt 0) {
+        Write-Host ''
+        Write-Host 'FINDINGS'
+        if ($newFindings.Count -gt 0) {
+            Write-Host ''
+            Write-Host '  New'
+            foreach ($finding in $newFindings) {
+                Write-Host ('    [{0}] {1}' -f $finding.severity, $finding.code)
+                Write-Host ('      {0}' -f $finding.affectedComponent)
+            }
+        }
+        if ($severityChanges.Count -gt 0) {
+            Write-Host ''
+            Write-Host '  Severity changed'
+            foreach ($finding in $severityChanges) {
+                Write-Host ('    {0}' -f $finding.code)
+                Write-Host ('      {0} -> {1}' -f $finding.severityBefore, $finding.severityAfter)
+            }
+        }
+        if ($resolvedFindings.Count -gt 0) {
+            Write-Host ''
+            Write-Host '  Resolved'
+            foreach ($finding in $resolvedFindings) {
+                Write-Host ('    {0}' -f $finding.code)
+                Write-Host ('      {0}' -f $finding.affectedComponent)
+            }
+        }
+    }
+
+    $healthChanges = @($Comparison.changes.health)
+    if ($healthChanges.Count -gt 0) {
+        Write-Host ''
+        Write-Host 'HEALTH'
+        foreach ($group in ($healthChanges | Group-Object subsystem)) {
+            Write-Host ''
+            Write-Host ('  {0}' -f (Get-HealthSubsystemLabel $group.Name))
+            foreach ($item in @($group.Group | Where-Object kind -eq 'Changed')) {
+                $label = Get-HealthFieldLabel $item.field
+                Write-Host ('    {0} changed' -f $item.changeType)
+                Write-Host ('      {0}:' -f $label)
+                Write-Host ('        Before: {0}' -f $item.before)
+                Write-Host ('        Now:    {0}' -f $item.after)
+            }
+            $added = @($group.Group | Where-Object kind -eq 'Added')
+            if ($added.Count -gt 0) {
+                Write-Host '    Added'
+                foreach ($item in $added) { Write-Host ('      {0}' -f $item.after) }
+            }
+            $removed = @($group.Group | Where-Object kind -eq 'Removed')
+            if ($removed.Count -gt 0) {
+                Write-Host '    Removed'
+                foreach ($item in $removed) { Write-Host ('      {0}' -f $item.before) }
+            }
+        }
+    }
+
     $toolsChanged = @($Comparison.changes.tools | Where-Object kind -eq 'Changed')
     $toolsAdded = @($Comparison.changes.tools | Where-Object kind -eq 'Added')
     $toolsRemoved = @($Comparison.changes.tools | Where-Object kind -eq 'Removed')
@@ -126,66 +186,6 @@ function Write-ComparisonConsole {
             Write-Host '  Removed'
             foreach ($tool in $toolsRemoved) {
                 Write-Host ('    {0}' -f $tool.displayName)
-            }
-        }
-    }
-
-    $newFindings = @($Comparison.changes.findings | Where-Object kind -eq 'NewFinding')
-    $resolvedFindings = @($Comparison.changes.findings | Where-Object kind -eq 'ResolvedFinding')
-    $severityChanges = @($Comparison.changes.findings | Where-Object kind -eq 'SeverityChanged')
-
-    if ($newFindings.Count -gt 0 -or $resolvedFindings.Count -gt 0 -or $severityChanges.Count -gt 0) {
-        Write-Host ''
-        Write-Host 'FINDINGS'
-        if ($newFindings.Count -gt 0) {
-            Write-Host ''
-            Write-Host '  New'
-            foreach ($finding in $newFindings) {
-                Write-Host ('    [{0}] {1}' -f $finding.severity, $finding.code)
-                Write-Host ('      {0}' -f $finding.affectedComponent)
-            }
-        }
-        if ($resolvedFindings.Count -gt 0) {
-            Write-Host ''
-            Write-Host '  Resolved'
-            foreach ($finding in $resolvedFindings) {
-                Write-Host ('    {0}' -f $finding.code)
-                Write-Host ('      {0}' -f $finding.affectedComponent)
-            }
-        }
-        if ($severityChanges.Count -gt 0) {
-            Write-Host ''
-            Write-Host '  Severity changed'
-            foreach ($finding in $severityChanges) {
-                Write-Host ('    {0}' -f $finding.code)
-                Write-Host ('      {0} -> {1}' -f $finding.severityBefore, $finding.severityAfter)
-            }
-        }
-    }
-
-    $healthChanges = @($Comparison.changes.health)
-    if ($healthChanges.Count -gt 0) {
-        Write-Host ''
-        Write-Host 'HEALTH'
-        foreach ($group in ($healthChanges | Group-Object subsystem)) {
-            Write-Host ''
-            Write-Host ('  {0}' -f (Get-HealthSubsystemLabel $group.Name))
-            foreach ($item in @($group.Group | Where-Object kind -eq 'Changed')) {
-                $label = Get-HealthFieldLabel $item.field
-                Write-Host ('    {0} changed' -f $item.changeType)
-                Write-Host ('      {0}:' -f $label)
-                Write-Host ('        Before: {0}' -f $item.before)
-                Write-Host ('        Now:    {0}' -f $item.after)
-            }
-            $added = @($group.Group | Where-Object kind -eq 'Added')
-            if ($added.Count -gt 0) {
-                Write-Host '    Added'
-                foreach ($item in $added) { Write-Host ('      {0}' -f $item.after) }
-            }
-            $removed = @($group.Group | Where-Object kind -eq 'Removed')
-            if ($removed.Count -gt 0) {
-                Write-Host '    Removed'
-                foreach ($item in $removed) { Write-Host ('      {0}' -f $item.before) }
             }
         }
     }

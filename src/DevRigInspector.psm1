@@ -1,6 +1,7 @@
 $implementationRoot = $PSScriptRoot
 
 @(
+    'Private/New-DiagnosticSummary.ps1'
     'Private/New-InventoryResults.ps1'
     'Private/New-DiagnosticFinding.ps1'
     'Private/Get-PathDiagnostics.ps1'

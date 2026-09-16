@@ -33,6 +33,7 @@ function New-InspectionResult {
             collectorResults = @($CollectorResults)
             findings = @($Findings)
             health = $Health
+            summary = New-DiagnosticSummary -Findings $Findings
         }
     }
 }
