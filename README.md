@@ -213,7 +213,7 @@ Unavailable optional-feature queries, WSL with no detected distributions, and mi
 .\scripts\Build-ModulePackage.ps1
 ```
 
-The first command runs the full test suite. The second recreates `dist` and produces `dist\DevRigInspector-0.5.0\` and `dist\DevRigInspector-0.5.0.zip`, validating the manifest and the two public exports. It does not publish or install the module. Tool definitions live in `src\Collectors\ToolDefinitions.psd1`. See [architecture](docs/architecture.md) for the inspection and comparison pipelines.
+The first command runs the full test suite with Pester 3.4.0 and fails on failed or empty suites. The second recreates `dist` and produces `dist\DevRigInspector-0.5.0\` and `dist\DevRigInspector-0.5.0.zip`, validating the manifest and the two public exports. It does not publish or install the module. Tool definitions live in `src\Collectors\ToolDefinitions.psd1`. See [architecture](docs/architecture.md) for the inspection and comparison pipelines, and the [release checklist](docs/release-checklist.md) for test dependency setup, CI, and `scripts/Test-Release.ps1` package acceptance.
 
 Help is available after any supported import, including from the package:
 

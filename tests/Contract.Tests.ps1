@@ -12,12 +12,12 @@ Describe 'Inspection contract' {
     }
 
     It 'returns no object from the default human-readable mode' {
-        $result = Invoke-DevRigInspection
+        $result = Invoke-DevRigInspection 6>$null
         $result | Should Be $null
     }
 
     It 'returns the inventory object only with PassThru' {
-        $result = Invoke-DevRigInspection -PassThru
+        $result = Invoke-DevRigInspection -PassThru 6>$null
         $result.schemaVersion | Should Be '0.2'
         $result.collectorVersion | Should Be '0.5.0'
     }
@@ -25,7 +25,7 @@ Describe 'Inspection contract' {
     It 'writes JSON to OutputPath without returning the inventory object' {
         $outputPath = Join-Path $env:TEMP ('dev-rig-inspector-' + [guid]::NewGuid() + '.json')
         try {
-            $result = Invoke-DevRigInspection -OutputPath $outputPath
+            $result = Invoke-DevRigInspection -OutputPath $outputPath 6>$null
             $result | Should Be $null
             $inventory = Get-Content -LiteralPath $outputPath -Raw | ConvertFrom-Json
             $inventory.collectorVersion | Should Be '0.5.0'

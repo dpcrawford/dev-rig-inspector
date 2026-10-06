@@ -92,7 +92,7 @@ Describe 'Start-DevRigInspector.cmd' {
 
     It 'exits nonzero with installation guidance when pwsh cannot be found on PATH' {
         # Restrict PATH only for this one child cmd.exe process; the real session/workstation PATH is untouched.
-        $argString = 'set "PATH=C:\Windows\System32;C:\Windows" && "' + $cmdPath + '"'
+        $argString = 'set "PATH=' + (Join-Path $env:SystemRoot 'System32') + ';' + $env:SystemRoot + '" && "' + $cmdPath + '"'
         $output = & cmd.exe /c $argString 2>&1 | Out-String
         $exitCode = $LASTEXITCODE
         $exitCode | Should Not Be 0

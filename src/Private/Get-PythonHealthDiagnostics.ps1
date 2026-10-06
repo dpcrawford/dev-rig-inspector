@@ -7,7 +7,7 @@ function Get-PythonHealthDiagnostics {
     $workingRuntimes = @($runtimes | Where-Object runnable)
     $installedLocations = @($workingRuntimes | ForEach-Object path | Select-Object -Unique)
 
-    if (-not $selected -or -not $selected.runnable) {
+    if ($selected -and -not $selected.runnable) {
         $findings += New-DiagnosticFinding `
             -Code 'PythonInterpreterUnavailable' `
             -Severity Error `
