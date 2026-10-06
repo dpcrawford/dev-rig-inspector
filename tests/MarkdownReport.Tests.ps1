@@ -367,7 +367,7 @@ Describe 'Invoke-DevRigInspection Markdown CLI contract' {
             $reportPath = Join-Path $env:TEMP ('dev-rig-md-inventory-' + [guid]::NewGuid() + '.md')
             try {
                 $result = Invoke-DevRigInspection -ReportPath $reportPath -PassThru 6>$null
-                $result.schemaVersion | Should Be '0.1'
+                $result.schemaVersion | Should Be '0.2'
                 Test-Path $reportPath | Should Be $true
             } finally {
                 Remove-Item -LiteralPath $reportPath -Force -ErrorAction SilentlyContinue

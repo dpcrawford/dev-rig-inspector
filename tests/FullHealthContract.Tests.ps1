@@ -21,8 +21,8 @@ Describe 'Full v0.3 health contract' {
             Mock Get-VirtualizationHealthInventory { New-CollectorResult -CollectorId 'VirtualizationHealth' -Status Available -Data ([pscustomobject]@{}) }
 
             $inventory = Invoke-DevRigInspection -PassThru 6>$null
-            $inventory.schemaVersion | Should Be '0.1'
-            $inventory.collectorVersion | Should Be '0.4.0'
+            $inventory.schemaVersion | Should Be '0.2'
+            $inventory.collectorVersion | Should Be '0.5.0'
             $null -ne $inventory.computer | Should Be $true
             $null -ne $inventory.tools | Should Be $true
             $inventory.diagnostics.collectorResults.Count | Should Be 2

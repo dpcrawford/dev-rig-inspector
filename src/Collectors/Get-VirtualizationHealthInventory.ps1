@@ -18,7 +18,7 @@ function Get-VirtualizationFeatureEvidence {
 }
 
 function Get-WslDistributionEvidence {
-    param([Parameter(Mandatory)] [string] $Output)
+    param([Parameter(Mandatory)] [AllowEmptyString()] [string] $Output)
 
     $distributions = @()
     $lines = @($Output -replace "`0", '' -split "`r?`n" | Where-Object { $_.Trim().Length -gt 0 })

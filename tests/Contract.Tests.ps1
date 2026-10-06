@@ -5,30 +5,30 @@ Describe 'Inspection contract' {
     It 'produces a versioned JSON document with all configured tools' {
         $json = Invoke-DevRigInspection -JsonOnly
         $inventory = $json | ConvertFrom-Json
-        $inventory.schemaVersion | Should Be '0.1'
-        $inventory.collectorVersion | Should Be '0.4.0'
+        $inventory.schemaVersion | Should Be '0.2'
+        $inventory.collectorVersion | Should Be '0.5.0'
         $inventory.tools.Count | Should Be 9
         $inventory.diagnostics.collectorResults.Count | Should Be 2
     }
 
     It 'returns no object from the default human-readable mode' {
-        $result = Invoke-DevRigInspection
+        $result = Invoke-DevRigInspection 6>$null
         $result | Should Be $null
     }
 
     It 'returns the inventory object only with PassThru' {
-        $result = Invoke-DevRigInspection -PassThru
-        $result.schemaVersion | Should Be '0.1'
-        $result.collectorVersion | Should Be '0.4.0'
+        $result = Invoke-DevRigInspection -PassThru 6>$null
+        $result.schemaVersion | Should Be '0.2'
+        $result.collectorVersion | Should Be '0.5.0'
     }
 
     It 'writes JSON to OutputPath without returning the inventory object' {
         $outputPath = Join-Path $env:TEMP ('dev-rig-inspector-' + [guid]::NewGuid() + '.json')
         try {
-            $result = Invoke-DevRigInspection -OutputPath $outputPath
+            $result = Invoke-DevRigInspection -OutputPath $outputPath 6>$null
             $result | Should Be $null
             $inventory = Get-Content -LiteralPath $outputPath -Raw | ConvertFrom-Json
-            $inventory.collectorVersion | Should Be '0.4.0'
+            $inventory.collectorVersion | Should Be '0.5.0'
         } finally {
             Remove-Item -LiteralPath $outputPath -Force -ErrorAction SilentlyContinue
         }

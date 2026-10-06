@@ -4,7 +4,8 @@ function Assert-InventoryContract {
         [Parameter(Mandatory)] [string] $Label
     )
 
-    $supportedSchemaVersions = @('0.1')
+    # 0.1 = historical (v0.3/v0.4) shape including now-removed raw tool-probe fields; 0.2 = current curated tools[] contract.
+    $supportedSchemaVersions = @('0.1', '0.2')
 
     if ($null -eq $Inventory) {
         throw "The $Label inventory object was null."
@@ -20,6 +21,25 @@ function Assert-InventoryContract {
 
     if (-not $Inventory.PSObject.Properties['tools'] -or -not $Inventory.PSObject.Properties['diagnostics']) {
         throw "The $Label inventory does not match the expected Dev Rig Inspector structure."
+    }
+
+    if ($Inventory.tools -isnot [System.Array]) {
+        throw "The $Label inventory tools must be an array."
+    }
+    foreach ($tool in $Inventory.tools) {
+        if ($null -eq $tool -or $tool -isnot [pscustomobject]) {
+            throw "The $Label inventory contains a malformed tool."
+        }
+        foreach ($field in @('id', 'displayName', 'status', 'version')) {
+            if (-not $tool.PSObject.Properties[$field]) {
+                throw "The $Label inventory tool is missing '$field'."
+            }
+        }
+    }
+    if ($Inventory.diagnostics -isnot [pscustomobject] -or
+        -not $Inventory.diagnostics.PSObject.Properties['findings'] -or
+        $Inventory.diagnostics.findings -isnot [System.Array]) {
+        throw "The $Label inventory diagnostics must be an object with a findings array."
     }
 }
 

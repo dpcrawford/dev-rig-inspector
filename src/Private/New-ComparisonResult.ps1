@@ -83,7 +83,7 @@ function New-ComparisonResult {
 
     [pscustomobject]@{
         comparisonSchemaVersion = '0.1'
-        comparisonVersion = '0.4.0'
+        comparisonVersion = '0.5.0'
         reference = [pscustomobject]@{
             sourceType = $Reference.sourceType
             path = $Reference.path

@@ -1,0 +1,43 @@
+name: Windows validation
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: windows-2022
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install the suite's compatible Pester version
+        run: |
+          Install-Module Pester -RequiredVersion 3.4.0 -Repository PSGallery -Scope CurrentUser -Force -SkipPublisherCheck
+          Import-Module Pester -RequiredVersion 3.4.0 -Force
+          Write-Host "PowerShell $($PSVersionTable.PSVersion); Pester $((Get-Module Pester).Version)"
+      - name: Test (includes documentation, privacy, and launcher gates)
+        run: ./scripts/Invoke-Tests.ps1
+      - name: Parse, build, and verify the package outside the checkout
+        run: ./scripts/Test-Release.ps1
+      - name: Verify tracked repository files are unchanged
+        run: |
+          git diff --exit-code
+          if ($LASTEXITCODE -ne 0) { throw 'Validation modified tracked files' }
+          if (git status --porcelain) { throw 'Validation left unexpected repository changes' }
+      - name: Upload validated ZIP (CI artifact only)
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: DevRigInspector-0.5.0
+          path: dist/DevRigInspector-0.5.0.zip
+          if-no-files-found: error
+          retention-days: 14

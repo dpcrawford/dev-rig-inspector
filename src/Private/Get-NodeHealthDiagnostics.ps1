@@ -5,7 +5,7 @@ function Get-NodeHealthDiagnostics {
     $node = $NodeHealth.node
     $npm = $NodeHealth.npm
 
-    if (-not $node.selected -or -not $node.runnable) {
+    if ($node.selected -and -not $node.runnable) {
         $findings += New-DiagnosticFinding `
             -Code 'NodeRuntimeUnavailable' `
             -Severity Error `
@@ -15,7 +15,7 @@ function Get-NodeHealthDiagnostics {
             -AffectedComponent 'Node' `
             -Evidence @([pscustomobject]@{ selected = $node.selected; candidates = @($node.commandCandidates) }) `
             -Recommendation 'Review the selected Node installation without changing it automatically.'
-    } else {
+    } elseif ($node.selected -and $node.runnable) {
         $findings += New-DiagnosticFinding `
             -Code 'NodeRuntimeDetected' `
             -Severity Info `
