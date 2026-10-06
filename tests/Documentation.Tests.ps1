@@ -107,7 +107,9 @@ Describe 'Documentation and operator workflows' {
         Push-Location $script:docPackage
         try {
             . ([scriptblock]::Create((Get-ReadmeExample 'zip-import'))) 6>$null
-            (Get-Module DevRigInspector).Path | Should Be (Join-Path $script:docPackage 'DevRigInspector.psm1')
+            $actualPath = [IO.Path]::GetFullPath((Get-Module DevRigInspector).Path)
+            $expectedPath = [IO.Path]::GetFullPath((Join-Path $script:docPackage 'DevRigInspector.psm1'))
+            [string]::Equals($actualPath, $expectedPath, [StringComparison]::OrdinalIgnoreCase) | Should Be $true
         } finally { Pop-Location }
     }
 
@@ -119,7 +121,7 @@ Describe 'Documentation and operator workflows' {
         Push-Location $script:docPackage
         try { . ([scriptblock]::Create($copySteps)) } finally { Pop-Location }
         $runner = Join-Path $script:docWork 'installed-example.ps1'
-        @('$ErrorActionPreference = ''Stop''', (Get-ReadmeExample 'installed-import'), '(Get-Module DevRigInspector).ModuleBase') | Set-Content $runner
+        @('$ErrorActionPreference = ''Stop''', (Get-ReadmeExample 'installed-import'), "'MODULEBASE=' + (Get-Module DevRigInspector).ModuleBase") | Set-Content $runner
         $previousModulePath = $env:PSModulePath
         try {
             $env:PSModulePath = $temporaryModules + [IO.Path]::PathSeparator + $previousModulePath
@@ -127,7 +129,11 @@ Describe 'Documentation and operator workflows' {
             try { $result = & pwsh -NoProfile -File $runner 2>&1 | Out-String; $exitCode = $LASTEXITCODE } finally { Pop-Location }
         } finally { $env:PSModulePath = $previousModulePath }
         $exitCode | Should Be 0
-        $result | Should Match ([regex]::Escape($moduleRoot))
+        $moduleBaseLine = [regex]::Match($result, '(?m)^MODULEBASE=(.+)$')
+        $moduleBaseLine.Success | Should Be $true
+        $actualModuleBase = [IO.Path]::GetFullPath($moduleBaseLine.Groups[1].Value.Trim())
+        $expectedModuleBase = [IO.Path]::GetFullPath($moduleRoot)
+        [string]::Equals($actualModuleBase, $expectedModuleBase, [StringComparison]::OrdinalIgnoreCase) | Should Be $true
     }
 
     It 'executes basic, report, JSON, baseline, and Markdown comparison examples from the package' {
