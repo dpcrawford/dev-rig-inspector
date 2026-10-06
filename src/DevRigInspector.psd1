@@ -10,6 +10,7 @@
         PSData = @{
             Tags = @('Windows', 'PowerShell', 'Diagnostics', 'DeveloperTools', 'Inventory', 'Health')
             ProjectUri = 'https://github.com/dpcrawford/dev-rig-inspector'
+            LicenseUri = 'https://github.com/dpcrawford/dev-rig-inspector/blob/main/LICENSE'
             ReleaseNotes = 'v0.5.0: PowerShell 7 runtime guidance, versioned packaging, inventory schema 0.2 privacy hardening, and operator documentation/help.'
         }
     }

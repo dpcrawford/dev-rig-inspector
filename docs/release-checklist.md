@@ -2,7 +2,7 @@
 
 [Back to README](../README.md)
 
-This is a manual release gate, not permission or automation to tag or publish. Licensing has not yet been finalized: a license decision is required before release. Do not describe the project as open source without a license.
+This is a manual release gate, not permission or automation to tag or publish. The project license is MIT; see [LICENSE](../LICENSE).
 
 ## Validate the candidate
 
@@ -20,7 +20,7 @@ This is a manual release gate, not permission or automation to tag or publish. L
 
 ## Manual release decisions
 
-- [ ] Resolve and document licensing; no LICENSE has been selected automatically.
+- [x] Resolve and document licensing; MIT selected by the project owner and recorded in LICENSE.
 - [ ] Approve the PR and merge through the normal repository process.
 - [ ] Verify clean main and green CI on the merged commit; review the validated package and release notes.
 - [ ] Explicitly approve the tag and GitHub Release before creating either. No script/workflow here creates a tag, release, or PowerShell Gallery publication.
@@ -31,4 +31,4 @@ The source workflow is `.github/workflows/windows.yml`: pull requests, pushes to
 
 Real inspections depend on host PATH and optional tools and may query GitHub authentication state, but tests do not assert the runner's tool versions or an authenticated account. Semantic fixtures cover absence, failure, and unavailable evidence. Process-runner tests deliberately launch PowerShell and time out a sleeping child. No runner tools are removed and no feature or authentication configuration is changed to manufacture test conditions.
 
-CI installs only Pester as a test dependency in CurrentUser scope. Product inspection does not install anything. CI logs show versions, test counts, parser/manifest results, package paths, and public exports, not full inventories, arbitrary environment variables, or authentication transcripts. Remote CI execution remains pending until the candidate is committed and pushed.
+CI installs only Pester as a test dependency in CurrentUser scope. Product inspection does not install anything. CI logs show versions, test counts, parser/manifest results, package paths, and public exports, not full inventories, arbitrary environment variables, or authentication transcripts. Confirm that the candidate PR's Windows run is green for the exact commit under review.

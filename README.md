@@ -225,4 +225,4 @@ Get-Help Compare-DevRigInspection -Full
 
 ## License
 
-Licensing has not yet been finalized. There is currently no LICENSE file; license selection remains a release decision.
+This project is licensed under the [MIT License](LICENSE).
