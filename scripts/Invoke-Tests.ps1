@@ -18,6 +18,9 @@ $result = Invoke-Pester -Path $Path -PassThru 6>$null
 Write-Host "Tests: $($result.TotalCount); Passed: $($result.PassedCount); Failed: $($result.FailedCount); Skipped: $($result.SkippedCount)"
 foreach ($failure in @($result.TestResult | Where-Object { -not $_.Passed })) {
     Write-Host "Non-passing test: $($failure.Describe) / $($failure.Name)"
+    $line = $failure.ErrorRecord.InvocationInfo.ScriptLineNumber
+    $exceptionType = if ($failure.ErrorRecord.Exception) { $failure.ErrorRecord.Exception.GetType().Name } else { 'Unavailable' }
+    if ($line) { Write-Host "  Failure location: line $line; exception type: $exceptionType" }
 }
 if ($result.TotalCount -eq 0 -or $result.FailedCount -gt 0) {
     throw 'Test gate failed. Reproduce the named tests locally to inspect detailed output.'
