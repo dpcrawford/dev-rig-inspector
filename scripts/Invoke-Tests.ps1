@@ -26,3 +26,4 @@ foreach ($failure in @($result.TestResult | Where-Object { -not $_.Passed })) {
 if ($result.TotalCount -eq 0 -or $result.FailedCount -gt 0) {
     throw 'Test gate failed. Reproduce the named tests locally to inspect detailed output.'
 }
+$global:LASTEXITCODE = 0
